@@ -9,7 +9,7 @@ import (
 )
 
 func (c *client) GetActivity(ctx context.Context, id int64) (*Activity, error) {
-	accessToken, err := c.getAccessToken(ctx)
+	accessToken, err := c.GetAccessToken(ctx)
 	if err != nil {
 		return nil, err
 	}

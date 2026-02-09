@@ -9,7 +9,7 @@ import (
 )
 
 func (c *client) GetActivityStream(ctx context.Context, id int64) (*ActivityStream, error) {
-	accessToken, err := c.getAccessToken(ctx)
+	accessToken, err := c.GetAccessToken(ctx)
 	if err != nil {
 		return nil, err
 	}
