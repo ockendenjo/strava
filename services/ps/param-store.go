@@ -2,6 +2,8 @@ package ps
 
 import (
 	"context"
+	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -9,47 +11,108 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ssm/types"
 )
 
-const ssmPrefix = "/strava/"
+const (
+	prefix          = "/strava/"
+	keyAccessToken  = "accessToken"
+	keyRefreshToken = "refreshToken"
+	keyExpiryTime   = "expiryTime"
+	keyVerifyToken  = "verifyToken"
+)
 
-func NewParamClient(client *ssm.Client) *ParamClient {
-	return &ParamClient{ssmClient: client}
+type ParamsClient interface {
+	GetParams(ctx context.Context) (StravaParams, error)
+	SetRefreshedParams(ctx context.Context, refreshToken, accessToken string, expiryTime int64) error
+	SetVerifyToken(ctx context.Context, value string) error
 }
 
-type ParamClient struct {
+func NewParamsClient(client *ssm.Client) ParamsClient {
+	return &paramsClient{ssmClient: client}
+}
+
+type paramsClient struct {
 	ssmClient *ssm.Client
-	params    map[string]string
 }
 
-func (c *ParamClient) GetParams(ctx context.Context) (map[string]string, error) {
-	if c.params != nil {
-		return c.params, nil
-	}
+func (c *paramsClient) GetParams(ctx context.Context) (StravaParams, error) {
 
-	result, err := c.ssmClient.GetParametersByPath(ctx, &ssm.GetParametersByPathInput{
-		Path:           aws.String(ssmPrefix),
-		WithDecryption: aws.Bool(true),
+	res, err := c.ssmClient.GetParametersByPath(ctx, &ssm.GetParametersByPathInput{
+		Path:           aws.String(prefix),
 		Recursive:      aws.Bool(true),
+		WithDecryption: aws.Bool(true),
 	})
 	if err != nil {
-		return nil, err
-	}
-	paramMap := map[string]string{}
-
-	for _, parameter := range result.Parameters {
-		name := strings.Replace(*parameter.Name, ssmPrefix, "", 1)
-		paramMap[name] = *parameter.Value
+		return StravaParams{}, err
 	}
 
-	c.params = paramMap
-	return paramMap, nil
+	sp := StravaParams{}
+
+	for _, parameter := range res.Parameters {
+		key := strings.ReplaceAll(*parameter.Name, prefix, "")
+		switch key {
+		case "clientId":
+			sp.ClientId = *parameter.Value
+		case "clientSecret":
+			sp.ClientSecret = *parameter.Value
+		case keyAccessToken:
+			sp.AccessToken = *parameter.Value
+		case keyRefreshToken:
+			sp.RefreshToken = *parameter.Value
+		case keyExpiryTime:
+			parsed, err := strconv.ParseInt(*parameter.Value, 10, 64)
+			if err != nil {
+				return StravaParams{}, err
+			}
+			sp.ExpiryTime = parsed
+		case keyVerifyToken:
+			sp.VerifyToken = *parameter.Value
+		}
+	}
+	return sp, nil
 }
 
-func (c *ParamClient) SetParam(ctx context.Context, key string, value string, paramType types.ParameterType) error {
+func (c *paramsClient) SetRefreshedParams(ctx context.Context, refreshToken, accessToken string, expiryTime int64) error {
+	err := c.SetRefreshToken(ctx, refreshToken)
+	if err != nil {
+		return err
+	}
+	err = c.SetAccessToken(ctx, accessToken)
+	if err != nil {
+		return err
+	}
+	return c.SetExpiryTime(ctx, expiryTime)
+}
+
+func (c *paramsClient) SetRefreshToken(ctx context.Context, value string) error {
+	return c.setParam(ctx, keyRefreshToken, value, types.ParameterTypeSecureString)
+}
+
+func (c *paramsClient) SetAccessToken(ctx context.Context, value string) error {
+	return c.setParam(ctx, keyAccessToken, value, types.ParameterTypeSecureString)
+}
+
+func (c *paramsClient) SetExpiryTime(ctx context.Context, expiryTime int64) error {
+	return c.setParam(ctx, keyExpiryTime, fmt.Sprintf("%d", expiryTime), types.ParameterTypeString)
+}
+
+func (c *paramsClient) SetVerifyToken(ctx context.Context, value string) error {
+	return c.setParam(ctx, keyVerifyToken, value, types.ParameterTypeString)
+}
+
+func (c *paramsClient) setParam(ctx context.Context, key, value string, paramType types.ParameterType) error {
 	_, err := c.ssmClient.PutParameter(ctx, &ssm.PutParameterInput{
-		Name:      aws.String(ssmPrefix + key),
+		Name:      aws.String(fmt.Sprintf("%s%s", prefix, key)),
 		Value:     aws.String(value),
 		Type:      paramType,
 		Overwrite: aws.Bool(true),
 	})
 	return err
+}
+
+type StravaParams struct {
+	ClientId     string
+	ClientSecret string
+	AccessToken  string
+	RefreshToken string
+	ExpiryTime   int64
+	VerifyToken  string
 }
