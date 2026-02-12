@@ -13,6 +13,6 @@ type WebhookEvent struct {
 type WebhookUpdates struct {
 	Title      *string `json:"title"`
 	Type       *string `json:"type"`
-	Private    *bool   `json:"private"`
-	Authorized *bool   `json:"authorized"`
+	Private    *string `json:"private"`
+	Authorized *string `json:"authorized"`
 }
