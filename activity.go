@@ -21,3 +21,10 @@ type PolylineMap struct {
 	ID       string `json:"id"`
 	Polyline string `json:"polyline"`
 }
+
+type ActivityUpdates struct {
+	Name         string  `json:"name"`
+	HideFromHome *bool   `json:"hide_from_home,omitempty"`
+	Commute      *bool   `json:"commute,omitempty"`
+	GearID       *string `json:"gear_id,omitempty"`
+}

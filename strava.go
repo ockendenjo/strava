@@ -15,6 +15,7 @@ type Client interface {
 	GetActivity(ctx context.Context, id int64) (*Activity, error)
 	GetActivityStream(ctx context.Context, id int64) (*ActivityStream, error)
 	Subscribe(ctx context.Context, callbackURL, verifyToken string) error
+	UpdateActivity(ctx context.Context, id int64, updates ActivityUpdates) error
 }
 
 func NewClient(ssmClient *ssm.Client, httpClient *http.Client) Client {
