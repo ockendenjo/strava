@@ -4,6 +4,9 @@ on:
   schedule:
     - cron: "35 9 * * *"
 
+permissions:
+  contents: read
+
 jobs:
   sast:
-    uses: ockendenjo/actions/.github/workflows/sast.yaml@main
+    uses: ockendenjo/actions/.github/workflows/sast.yaml@a165d037971cc650b531716c82413fd736dea80a
