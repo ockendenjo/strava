@@ -30,7 +30,7 @@ func (c *client) Subscribe(ctx context.Context, callbackURL, verifyToken string)
 	q.Set("verify_token", verifyToken)
 	u.RawQuery = q.Encode()
 
-	req, err := http.NewRequestWithContext(ctx, "POST", u.String(), nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, u.String(), nil)
 	if err != nil {
 		return err
 	}
@@ -38,9 +38,9 @@ func (c *client) Subscribe(ctx context.Context, callbackURL, verifyToken string)
 	if err != nil {
 		return err
 	}
-	defer func(Body io.ReadCloser) {
-		_ = Body.Close()
-	}(res.Body)
+	defer func() {
+		_ = res.Body.Close()
+	}()
 
 	if res.StatusCode == http.StatusCreated {
 		return nil

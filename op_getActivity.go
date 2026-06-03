@@ -14,7 +14,7 @@ func (c *client) GetActivity(ctx context.Context, id int64) (*Activity, error) {
 		return nil, err
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "GET", "https://www.strava.com/api/v3/activities/"+fmt.Sprint(id), nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://www.strava.com/api/v3/activities/"+fmt.Sprint(id), nil)
 	if err != nil {
 		return nil, err
 	}

@@ -19,7 +19,7 @@ func (c *client) UpdateActivity(ctx context.Context, id int64, updates ActivityU
 		return err
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "PUT", "https://www.strava.com/api/v3/activities/"+fmt.Sprint(id), bytes.NewBuffer(jsonBody))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPut, "https://www.strava.com/api/v3/activities/"+fmt.Sprint(id), bytes.NewBuffer(jsonBody))
 	if err != nil {
 		return err
 	}

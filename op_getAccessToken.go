@@ -37,7 +37,7 @@ func (c *client) GetAccessToken(ctx context.Context) (string, error) {
 	u.RawQuery = q.Encode()
 	fmt.Println(u)
 
-	req, err := http.NewRequestWithContext(ctx, "POST", u.String(), nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, u.String(), nil)
 	if err != nil {
 		return "", err
 	}
@@ -45,15 +45,15 @@ func (c *client) GetAccessToken(ctx context.Context) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer func(Body io.ReadCloser) {
-		_ = Body.Close()
-	}(res.Body)
+	defer func() {
+		_ = res.Body.Close()
+	}()
 
 	bytes, err := io.ReadAll(res.Body)
 	if err != nil {
 		return "", err
 	}
-	if res.StatusCode != 200 {
+	if res.StatusCode != http.StatusOK {
 		return "", HttpStatusError{StatusCode: res.StatusCode, Body: string(bytes)}
 	}
 

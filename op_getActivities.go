@@ -15,7 +15,7 @@ func (c *client) GetActivities(ctx context.Context, page int) ([]Activity, error
 	}
 
 	stravaUrl := fmt.Sprintf("https://www.strava.com/api/v3/athlete/activities?page=%d", page)
-	req, err := http.NewRequestWithContext(ctx, "GET", stravaUrl, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, stravaUrl, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -25,9 +25,9 @@ func (c *client) GetActivities(ctx context.Context, page int) ([]Activity, error
 	if err != nil {
 		return nil, err
 	}
-	defer func(Body io.ReadCloser) {
-		_ = Body.Close()
-	}(res.Body)
+	defer func() {
+		_ = res.Body.Close()
+	}()
 
 	bytes, err := io.ReadAll(res.Body)
 	if err != nil {
