@@ -37,7 +37,7 @@ func (c *client) GetAccessToken(ctx context.Context) (string, error) {
 	u.RawQuery = q.Encode()
 	fmt.Println(u)
 
-	req, err := http.NewRequestWithContext(ctx, "POST", u.String(), nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, u.String(), nil)
 	if err != nil {
 		return "", err
 	}

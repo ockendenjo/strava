@@ -15,7 +15,7 @@ func (c *client) GetActivityStream(ctx context.Context, id int64) (*ActivityStre
 	}
 
 	url := fmt.Sprintf("https://www.strava.com/api/v3/activities/%d/streams?keys=latlng&key_by_type=true", id)
-	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}

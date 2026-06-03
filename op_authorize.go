@@ -28,7 +28,7 @@ func (c *client) Authorize(ctx context.Context, code string) error {
 	q.Set("code", code)
 	u.RawQuery = q.Encode()
 
-	req, err := http.NewRequestWithContext(ctx, "POST", u.String(), nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, u.String(), nil)
 	if err != nil {
 		return err
 	}
