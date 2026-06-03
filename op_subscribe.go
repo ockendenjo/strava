@@ -38,9 +38,9 @@ func (c *client) Subscribe(ctx context.Context, callbackURL, verifyToken string)
 	if err != nil {
 		return err
 	}
-	defer func(Body io.ReadCloser) {
-		_ = Body.Close()
-	}(res.Body)
+	defer func() {
+		_ = res.Body.Close()
+	}()
 
 	if res.StatusCode == http.StatusCreated {
 		return nil
