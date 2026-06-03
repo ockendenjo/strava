@@ -25,9 +25,9 @@ func (c *client) GetActivities(ctx context.Context, page int) ([]Activity, error
 	if err != nil {
 		return nil, err
 	}
-	defer func(Body io.ReadCloser) {
-		_ = Body.Close()
-	}(res.Body)
+	defer func() {
+		_ = res.Body.Close()
+	}()
 
 	bytes, err := io.ReadAll(res.Body)
 	if err != nil {
