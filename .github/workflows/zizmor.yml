@@ -39,5 +39,5 @@ jobs:
         shell: bash
         run: |
           ./zizmor --pedantic ./.github/
-        with:
+        env:
           GH_TOKEN: ${{ github.token }}
