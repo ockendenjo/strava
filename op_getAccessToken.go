@@ -23,7 +23,10 @@ func (c *client) GetAccessToken(ctx context.Context) (string, error) {
 		return c.params.AccessToken, nil
 	}
 
-	//Need to refresh
+	return c.refreshToken(ctx)
+}
+
+func (c *client) refreshToken(ctx context.Context) (string, error) {
 	u, err := url.Parse("https://www.strava.com/oauth/token")
 	if err != nil {
 		return "", err
@@ -67,7 +70,6 @@ func (c *client) GetAccessToken(ctx context.Context) (string, error) {
 	c.params.RefreshToken = refreshRes.RefreshToken
 	c.params.ExpiryTime = refreshRes.ExpiryTime
 
-	//Set SSM params
 	err = c.psClient.SetRefreshedParams(ctx, refreshRes.RefreshToken, refreshRes.AccessToken, refreshRes.ExpiryTime)
 	if err != nil {
 		return "", err
